@@ -15,14 +15,14 @@ import {
   DiagnosticsPublisher,
   SeverityString,
 } from "./diagnostics/internals.ts";
-import { SignPublisher } from "./diagnostics/publishers/sign.ts";
-import { HighlightPublisher } from "./diagnostics/publishers/highlight.ts";
-import { VirtualTextPublisher } from "./diagnostics/publishers/virtualtext.ts";
+import { SignPublisher } from "./diagnostics/publisher/sign.ts";
+import { HighlightPublisher } from "./diagnostics/publisher/highlight.ts";
+import { VirtualTextPublisher } from "./diagnostics/publisher/virtualtext.ts";
 import {
   compareLocItem,
   LoclistPublisher,
   toLocItem,
-} from "./diagnostics/publishers/loclist.ts";
+} from "./diagnostics/publisher/loclist.ts";
 
 type PublisherKind = "highlight" | "virtualtext" | "sign" | "loclist";
 
