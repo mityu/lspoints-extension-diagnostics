@@ -298,7 +298,7 @@ export class Extension extends BaseExtension {
         if (lspoints.getClients(bufnr).length <= 1) {
           promises.push(
             autocmd.remove(denops, "BufWinEnter", `<buffer=${bufnr}>`, {
-              group: "lspionts.extension.diagnostics",
+              group: "lspoints.extension.diagnostics",
             }),
           );
           this.#watchingBuffers.delete(bufnr);
