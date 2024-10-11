@@ -152,8 +152,8 @@ export class Extension extends BaseExtension {
       },
     );
 
-    lspoints.subscribeAttach(async (clientName) => {
-      await this.#onAttach(denops, lspoints, onReopen, clientName);
+    lspoints.subscribeAttach(async (clientName, bufnr) => {
+      await this.#onAttach(denops, onReopen, bufnr);
     });
 
     lspoints.subscribeDetach(async (clientName) => {
@@ -250,39 +250,28 @@ export class Extension extends BaseExtension {
 
   async #onAttach(
     denops: Denops,
-    lspoints: Lspoints,
     onReopen: lambda.Lambda,
-    clientName: string,
+    bufnr: number,
   ) {
-    const newWatchingBuffers = [] as number[];
-    lspoints.getClient(clientName)?.getAttachedBufNrs().forEach((bufnr) => {
-      if (!this.#watchingBuffers.has(bufnr)) {
-        this.#watchingBuffers.add(bufnr);
-        newWatchingBuffers.push(bufnr);
-      }
-    });
-
     await autocmd.group(
       denops,
       "lspoints.extension.diagnostics",
       (helper) => {
-        for (const bufnr of newWatchingBuffers) {
-          helper.remove("BufWinEnter", `<buffer=${bufnr}>`);
-          helper.define(
-            "BufWinEnter",
-            `<buffer=${bufnr}>`,
-            `call denops#notify('${denops.name}', '${onReopen.id}', [${bufnr}])`,
-            {
-              nested: true,
-            },
-          );
-        }
+        helper.remove("BufWinEnter", `<buffer=${bufnr}>`);
+        helper.define(
+          "BufWinEnter",
+          `<buffer=${bufnr}>`,
+          `call denops#notify('${denops.name}', '${onReopen.id}', [${bufnr}])`,
+          {
+            nested: true,
+          },
+        );
       },
     );
   }
 
   async #onDetach(denops: Denops, lspoints: Lspoints, clientName: string) {
-    const bufnrs = this.#diagnostics.get(clientName)?.keys();
+    const bufnrs = lspoints.getClient(clientName)?.getAttachedBufNrs();
     if (bufnrs) {
       const promises = [] as Promise<void>[];
       for (const bufnr of bufnrs) {
@@ -301,7 +290,6 @@ export class Extension extends BaseExtension {
               group: "lspoints.extension.diagnostics",
             }),
           );
-          this.#watchingBuffers.delete(bufnr);
         }
       }
       await Promise.all(promises);
